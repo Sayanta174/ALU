@@ -1,0 +1,73 @@
+// This is a miniature 4-bit unsigned ALU which performs a particular operation depending upon a 4-bit op-code.
+
+// Here operand1 is 'a' and operand2 is 'b' and outputs are 'q' and 'finalCarry'.
+
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company:		Self
+// Engineer:		SK NAZMUL HAQUE
+// Create Date:		20:42:19 03/05/2024 
+// Project Name:	Arithmetic Logic Unit
+//////////////////////////////////////////////////////////////////////////////////
+module ALU(
+    input rst,
+    input [3:0] opcode,
+    input [3:0] a,
+    input [3:0] b,
+    output reg [3:0] q,
+    output reg finalCarry
+    );
+	
+	wire [3:0] sum,diff;
+
+	reg [3:0] temp,q1;
+	
+	initial begin
+		q1 = 4'b0000;
+	end
+	
+	always@*begin
+		// "temp" is the 1's complement of "a"
+		temp = {~a[3], ~a[2], ~a[1], ~a[0]};
+	
+		if(rst==1)begin
+			q1 = 4'b0000;
+		end
+		else
+		case(opcode)
+            4'b0001:  {finalCarry, q1} = a + b;
+            4'b0010:  {finalCarry, q1} = a - b;
+            4'b0011:  q1 = a & b;
+            4'b0100:  q1 = a ^ b;
+            4'b0101:  q1 = a | b;
+            4'b0110:  q1 = temp + 1;
+            4'b0111:  q1 = temp;
+            4'b1000:
+                case(b)
+                    4'b0001:     q1 = a << 1;
+                    4'b0010:     q1 = a << 2;
+                    4'b0011:     q1 = a << 3;
+                endcase
+            4'b1001:
+                case(b)
+                    4'b0001:     q1 = a >> 1;
+                    4'b0010:     q1 = a >> 2;
+                    4'b0011:     q1 = a >> 3;
+                endcase
+            4'b1010:
+                case(b)
+                    4'b0001:     q1 = {a[2:0], a[3]};
+                    4'b0010:     q1 = {a[1:0], a[3:2]};
+                    4'b0011:     q1 = {a[0], a[3:1]};
+                endcase
+            4'b1011:
+                case(b)
+                    4'b0001:     q1 = {a[0], a[3:1]};
+                    4'b0010:     q1 = {a[1:0], a[3:2]};
+                    4'b0011:     q1 = {a[2:0], a[3]};
+                endcase
+	   endcase
+		q = q1;
+	end
+	
+endmodule
